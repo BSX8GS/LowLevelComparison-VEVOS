@@ -46,9 +46,9 @@ public class Compare {
         while(iterator.hasNext()) {
             String line = iterator.next();
             String splitLine[] = line.split(";");//Line of the previous file
-            String currFile = splitLine[0];
-            String currBlockCondition = splitLine[2];
-            String currPresenceCondition = splitLine[3];
+            String currFile = splitLine[0].trim();
+            String currBlockCondition = splitLine[2].trim();
+            String currPresenceCondition = splitLine[3].trim();
             int currStartLine = Integer.parseInt(splitLine[5]);
             int currEndLine = Integer.parseInt(splitLine[6]);
 
@@ -56,9 +56,9 @@ public class Compare {
             while (iteratorPrev.hasNext()) {
                 String prevLine = iteratorPrev.next();
                 String prevSplitLine[] = prevLine.split(";");
-                String prevFile = prevSplitLine[0];
-                String prevBlockCondition = prevSplitLine[2];
-                String prevPresenceCondition = prevSplitLine[3];
+                String prevFile = prevSplitLine[0].trim();
+                String prevBlockCondition = prevSplitLine[2].trim();
+                String prevPresenceCondition = prevSplitLine[3].trim();
                 int prevStartLine = Integer.parseInt(prevSplitLine[5]);
                 int prevEndLine = Integer.parseInt(prevSplitLine[6]);
 
@@ -87,7 +87,7 @@ public class Compare {
         while(iterator.hasNext()) {
             String line = iterator.next();
             String splitLine[] = line.split(";");
-            String bc = splitLine[2];
+            String bc = splitLine[2].trim();
             if(!before_BlockCondition.contains(bc) && !newList.contains(bc)) {
                 newList.add(bc);
             }
@@ -104,8 +104,8 @@ public class Compare {
         while(iterator.hasNext()) {
             String line = iterator.next();
             String splitLine[] = line.split(";");//Line of the current file
-            if(!before_BlockCondition.contains(splitLine[2])){
-                before_BlockCondition.add(splitLine[2]);
+            if(!before_BlockCondition.contains(splitLine[2].trim())){
+                before_BlockCondition.add(splitLine[2].trim());
             }
         }
     }
