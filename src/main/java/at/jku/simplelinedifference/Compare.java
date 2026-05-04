@@ -6,9 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class Compare {
     //This class supposed to have a rough comparison between the presence conditions of the previous and current commit
@@ -39,45 +37,66 @@ public class Compare {
         currentFile = Files.readAllLines(current);
         currentFile.remove(0);//removing header
     }
-
+    
     public void compare() throws IOException {
-        List<String> selectedBC = new ArrayList<>();
-        Iterator<String> iterator = previousFile.iterator();
-        while(iterator.hasNext()) {
-            String line = iterator.next();
-            String splitLine[] = line.split(";");//Line of the previous file
-            String currFile = splitLine[0].trim();
-            String currBlockCondition = splitLine[2].trim();
-            String currPresenceCondition = splitLine[3].trim();
-            int currStartLine = Integer.parseInt(splitLine[5]);
-            int currEndLine = Integer.parseInt(splitLine[6]);
 
-            Iterator<String> iteratorPrev = currentFile.iterator();
-            while (iteratorPrev.hasNext()) {
-                String prevLine = iteratorPrev.next();
-                String prevSplitLine[] = prevLine.split(";");
-                String prevFile = prevSplitLine[0].trim();
-                String prevBlockCondition = prevSplitLine[2].trim();
-                String prevPresenceCondition = prevSplitLine[3].trim();
-                int prevStartLine = Integer.parseInt(prevSplitLine[5]);
-                int prevEndLine = Integer.parseInt(prevSplitLine[6]);
+        // Key → list of block lengths
+        Map<String, List<Integer>> previousMap = buildMap(previousFile);
+        Map<String, List<Integer>> currentMap  = buildMap(currentFile);
 
-                if(   currFile.equals(prevFile)
-                   && currBlockCondition.equals(prevBlockCondition)
-                   && currPresenceCondition.equals(prevPresenceCondition)) {
-                    if((currEndLine - currStartLine) != (prevEndLine - prevStartLine)){
-                        //This indicates that there was a change in the feature itself
-                        if(!selectedBC.contains(currBlockCondition)) {
-                            selectedBC.add(currBlockCondition);
-                        }
-                    }
-                }
+        Set<String> selectedBC = new HashSet<>();
 
+        for (String key : previousMap.keySet()) {
+
+            if (!currentMap.containsKey(key)) continue;
+
+            List<Integer> prevLengths = previousMap.get(key);
+            List<Integer> currLengths = currentMap.get(key);
+
+            // Sort so we can compare consistently
+            Collections.sort(prevLengths);
+            Collections.sort(currLengths);
+
+            if (!prevLengths.equals(currLengths)) {
+                // extract block condition from key
+                String[] parts = key.split("\\|");
+                String bc = parts[1];
+
+                selectedBC.add(bc);
             }
         }
-        for(String bc: selectedBC) {
+
+        for (String bc : selectedBC) {
             appendFile(String.format("%s\n", bc), changedPath);
         }
+    }
+
+    private Map<String, List<Integer>> buildMap(List<String> file) {
+
+        Map<String, List<Integer>> map = new HashMap<>();
+
+        for (String line : file) {
+
+            String[] split = line.split(";");
+
+            if (split.length < 7) continue;
+
+            String fileName = split[0].trim();
+            String bc = split[2].trim();
+            String pc = split[3].trim();
+
+            int start = Integer.parseInt(split[5].trim());
+            int end   = Integer.parseInt(split[6].trim());
+
+            int length = end - start;
+
+            String key = fileName + "|" + bc + "|" + pc;
+
+            map.computeIfAbsent(key, k -> new ArrayList<>())
+                    .add(length);
+        }
+
+        return map;
     }
 
     public void getNewList() {
