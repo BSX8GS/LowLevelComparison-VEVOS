@@ -37,7 +37,7 @@ public class Compare {
         currentFile = Files.readAllLines(current);
         currentFile.remove(0);//removing header
     }
-    
+
     public void compare() throws IOException {
 
         // Key → list of block lengths
@@ -90,10 +90,12 @@ public class Compare {
 
             int length = end - start;
 
-            String key = fileName + "|" + bc + "|" + pc;
+            if(fileName.endsWith(".c") || fileName.endsWith(".h")) {
+                String key = fileName + "|" + bc + "|" + pc;
 
-            map.computeIfAbsent(key, k -> new ArrayList<>())
-                    .add(length);
+                map.computeIfAbsent(key, k -> new ArrayList<>())
+                        .add(length);
+            }
         }
 
         return map;
@@ -106,8 +108,11 @@ public class Compare {
         while(iterator.hasNext()) {
             String line = iterator.next();
             String splitLine[] = line.split(";");
+
+            String fileName = splitLine[0];
             String bc = splitLine[2].trim();
-            if(!before_BlockCondition.contains(bc) && !newList.contains(bc)) {
+            if(!before_BlockCondition.contains(bc) && !newList.contains(bc) &&
+                    (fileName.endsWith(".c") || fileName.endsWith(".h"))) {
                 newList.add(bc);
             }
         }
