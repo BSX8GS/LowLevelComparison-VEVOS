@@ -33,9 +33,11 @@ public class Compare {
 
     private void readFiles() throws IOException {
         previousFile = Files.readAllLines(previous);
-        previousFile.remove(0);//Removing header
+        if(previousFile.size()>0)
+            previousFile.remove(0);//Removing header
         currentFile = Files.readAllLines(current);
-        currentFile.remove(0);//removing header
+        if(currentFile.size()>0)
+            currentFile.remove(0);//removing header
     }
 
     public void compare() throws IOException {
